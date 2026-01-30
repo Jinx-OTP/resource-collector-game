@@ -1,6 +1,5 @@
 package com.jinx.otp;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -13,8 +12,8 @@ import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
 
-    private final float WORLD_WIDTH = 50f;
-    private final float WORLD_HEIGHT = 50f;
+    private final float WORLD_WIDTH = 10f;
+    private final float WORLD_HEIGHT = 10f;
 
     private final float PLAYER_WIDTH = 1f;
     private final float PLAYER_HEIGHT = 1f;
@@ -39,16 +38,16 @@ public class GameScreen implements Screen {
     private Array<Sprite> resourceSprites;
 
     private OrthographicCamera camera;
-    private SpriteBatch batch;
+    private SpriteBatch batch; // reference for conveniece. DO NOT DISPOSE
 
-    private Game game;
+    private ResourceCollectorGame game;
 
-    public GameScreen(Game game) {
+    public GameScreen(ResourceCollectorGame game) {
         this.game = game;
+        batch = game.getBatch();
         setupBackground();
         setupPlayer();
         setupCamera(); // need to perform after player setup!!
-        setupBatch();
     }
     
     private void setupBackground() {
@@ -80,10 +79,6 @@ public class GameScreen implements Screen {
         camera.position.set(posX, posY, posZ);
         camera.zoom = DEFAULT_CAMERA_ZOOM;
         camera.update();
-    }
-
-    private void setupBatch() {
-        batch = new SpriteBatch();
     }
 
     @Override
@@ -178,7 +173,6 @@ public class GameScreen implements Screen {
         playerTexture.dispose();
         resourceTexture.dispose();
         backgroundTexture.dispose();
-        batch.dispose();
     }
 
     private enum Direction {

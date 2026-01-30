@@ -1,6 +1,5 @@
 package com.jinx.otp;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -13,19 +12,20 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 /** First screen of the application. Displayed after the application is created. */
 public class MainMenuScreen implements Screen {
 
-    private Game game;
+    private ResourceCollectorGame game;
 
     private final float WORLD_WIDTH = 5f;
     private final float WORLD_HEIGHT = 3f;
     private Viewport viewport;
-    private SpriteBatch batch;
+    private SpriteBatch batch; // local for convenience. DO NOT DISPOSE
 
     private BitmapFont font;
 
-    public MainMenuScreen(Game game) {
+
+    public MainMenuScreen(ResourceCollectorGame game) {
         this.game = game;
         viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT);
-        batch = new SpriteBatch();
+        batch = game.getBatch();
         setupFont();
     }
 
@@ -95,6 +95,5 @@ public class MainMenuScreen implements Screen {
     @Override
     public void dispose() {
         font.dispose();
-        batch.dispose();
     }
 }
