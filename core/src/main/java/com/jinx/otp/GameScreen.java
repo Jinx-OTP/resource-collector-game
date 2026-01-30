@@ -8,12 +8,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
 
-    private final float WORLD_WIDTH = 10f;
-    private final float WORLD_HEIGHT = 10f;
+    private final float WORLD_WIDTH = 25f;
+    private final float WORLD_HEIGHT = 25f;
 
     private final float PLAYER_WIDTH = 1f;
     private final float PLAYER_HEIGHT = 1f;
@@ -27,7 +28,7 @@ public class GameScreen implements Screen {
     private final String BACKGROUND_IMAGE_FILE_NAME = "resource-collector-background.png";
 
     private final float DEFAULT_CAMERA_WIDTH = 10f;
-    private final float DEFAULT_CAMERA_ZOOM = 0.02f;
+    private final float DEFAULT_CAMERA_ZOOM = 1f;
 
     private Texture playerTexture;
     private Texture resourceTexture;
@@ -70,7 +71,7 @@ public class GameScreen implements Screen {
 
     private void setupCamera() {
         float pixelWidth = Gdx.graphics.getWidth();
-        float pixelHeight = Gdx. graphics.getHeight();
+        float pixelHeight = Gdx.graphics.getHeight();
         float cameraDefaultHeight = DEFAULT_CAMERA_WIDTH * (pixelHeight / pixelWidth);
         camera = new OrthographicCamera(DEFAULT_CAMERA_WIDTH, cameraDefaultHeight);
         float posX = playerSprite.getX();
@@ -108,27 +109,77 @@ public class GameScreen implements Screen {
     }
 
     private void movePlayer(Direction direction, float delta) {
-        float speedX = 0f;
-        float speedY = 0f;
+        float playerMoveX = 0f;
+        float playerMoveY = 0f;
+        float cameraMoveX = 0f;
+        float cameraMoveY = 0f;
         float defaultSpeed = PLAYER_SPEED * delta;
         switch (direction) {
             case LEFT:
-                speedX = -defaultSpeed;
+                playerMoveX = -defaultSpeed;
+                if (isPlayerNotInCameraLock(direction)) {
+                    cameraMoveX = -defaultSpeed;
+                }
                 break;
             case RIGHT:
-                speedX = defaultSpeed;
+                playerMoveX = defaultSpeed;
+                if (isPlayerNotInCameraLock(direction)) {
+                    cameraMoveX = defaultSpeed;
+                }
                 break;
             case UP:
-                speedY = defaultSpeed;
+                playerMoveY = defaultSpeed;
+                if (isPlayerNotInCameraLock(direction)) {
+                    cameraMoveY = defaultSpeed;
+                }
                 break;
             case DOWN:
-                speedY = -defaultSpeed;
+                playerMoveY = -defaultSpeed;
+                if (isPlayerNotInCameraLock(direction)) {
+                    cameraMoveY = -defaultSpeed;
+                }
                 break;
             default:
                 break;
         }
-        playerSprite.translate(speedX, speedY);
-        camera.translate(speedX, speedY);
+        playerSprite.translate(playerMoveX, playerMoveY);
+        camera.translate(cameraMoveX, cameraMoveY);
+
+        float camaraMinX = camera.viewportWidth / 2;
+        float cameraMaxX = WORLD_WIDTH - (camera.viewportWidth / 2);
+        camera.position.x = MathUtils.clamp(camera.position.x, camaraMinX, cameraMaxX);
+        float cameraMinY = camera.viewportHeight / 2;
+        float cameraMaxY = WORLD_HEIGHT - camera.viewportHeight / 2;
+        camera.position.y = MathUtils.clamp(camera.position.y, cameraMinY, cameraMaxY);
+
+        float playerMinX = 0f;
+        float playerMaxX = WORLD_WIDTH - PLAYER_WIDTH;
+        playerSprite.setX(MathUtils.clamp(playerSprite.getX(), playerMinX, playerMaxX));
+
+        float playerMinY = 0f;
+        float playerMaxY = WORLD_HEIGHT - PLAYER_HEIGHT;
+        playerSprite.setY(MathUtils.clamp(playerSprite.getY(), playerMinY, playerMaxY));
+
+    }
+
+    private boolean isPlayerNotInCameraLock(Direction direction) {
+        float bufferZone;
+        switch (direction) {
+            case RIGHT:
+                bufferZone = camera.viewportWidth / 2;
+                return (playerSprite.getX() > bufferZone);
+            case LEFT:
+                bufferZone = WORLD_WIDTH - camera.viewportWidth / 2;
+                return (playerSprite.getX() < bufferZone);
+            case DOWN:
+                bufferZone = WORLD_HEIGHT - camera.viewportHeight / 2;
+                return (playerSprite.getY() < bufferZone);
+            case UP:
+                bufferZone = camera.viewportHeight / 2;
+                return (playerSprite.getY() > bufferZone);
+            default:
+                return false;
+        }
     }
 
     private void logic() {
@@ -151,8 +202,9 @@ public class GameScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         if (width <= 0 || height <= 0) return;
-        camera.viewportWidth = width;
-        camera.viewportHeight = height;
+        camera.viewportWidth = DEFAULT_CAMERA_WIDTH;
+        float ratio = (float) height / (float) width;
+        camera.viewportHeight = DEFAULT_CAMERA_WIDTH * ratio;
         camera.update();
     }
 
