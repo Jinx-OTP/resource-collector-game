@@ -18,7 +18,7 @@ public class GameScreen implements Screen {
 
     private final float PLAYER_WIDTH = 1f;
     private final float PLAYER_HEIGHT = 1f;
-    private final float PLAYER_SPEED = 1f;
+    private final float PLAYER_SPEED = 3f;
 
     private final float RESOURCE_WIDTH = 1f;
     private final float RESOURCE_HEIGHT = 1f;
@@ -74,8 +74,8 @@ public class GameScreen implements Screen {
         float pixelHeight = Gdx.graphics.getHeight();
         float cameraDefaultHeight = DEFAULT_CAMERA_WIDTH * (pixelHeight / pixelWidth);
         camera = new OrthographicCamera(DEFAULT_CAMERA_WIDTH, cameraDefaultHeight);
-        float posX = playerSprite.getX();
-        float posY = playerSprite.getY();
+        float posX = playerSprite.getX() + PLAYER_WIDTH / 2;
+        float posY = playerSprite.getY() + PLAYER_HEIGHT / 2;
         float posZ = 0f;
         camera.position.set(posX, posY, posZ);
         camera.zoom = DEFAULT_CAMERA_ZOOM;
@@ -108,6 +108,13 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+     * Move player and camera according to direction. Clamp user to world size. 
+     * Camera cannot show anything outside of the game world
+     * 
+     * @param direction
+     * @param delta
+     */
     private void movePlayer(Direction direction, float delta) {
         float playerMoveX = 0f;
         float playerMoveY = 0f;
@@ -166,16 +173,16 @@ public class GameScreen implements Screen {
         float bufferZone;
         switch (direction) {
             case RIGHT:
-                bufferZone = camera.viewportWidth / 2;
+                bufferZone = (camera.viewportWidth + PLAYER_WIDTH) / 2;
                 return (playerSprite.getX() > bufferZone);
             case LEFT:
-                bufferZone = WORLD_WIDTH - camera.viewportWidth / 2;
+                bufferZone = WORLD_WIDTH - (camera.viewportWidth + PLAYER_WIDTH) / 2;
                 return (playerSprite.getX() < bufferZone);
             case DOWN:
-                bufferZone = WORLD_HEIGHT - camera.viewportHeight / 2;
+                bufferZone = WORLD_HEIGHT - (camera.viewportHeight + PLAYER_HEIGHT) / 2;
                 return (playerSprite.getY() < bufferZone);
             case UP:
-                bufferZone = camera.viewportHeight / 2;
+                bufferZone = (camera.viewportHeight + PLAYER_HEIGHT) / 2;
                 return (playerSprite.getY() > bufferZone);
             default:
                 return false;
