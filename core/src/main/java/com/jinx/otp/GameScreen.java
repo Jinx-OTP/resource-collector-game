@@ -3,9 +3,11 @@ package com.jinx.otp;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -39,6 +41,7 @@ public class GameScreen implements Screen {
     private Sprite playerSprite;
     private Sprite backgroundSprite;
     private Array<Sprite> resourceSprites;
+    private BitmapFont font;
 
     private OrthographicCamera camera;
     private SpriteBatch batch; // reference for conveniece. DO NOT DISPOSE
@@ -54,6 +57,7 @@ public class GameScreen implements Screen {
         setupPlayer();
         setupCamera(); // need to perform after player setup!!
         setupResources();
+        setupLabel();
     }
     
     private void setupBackground() {
@@ -97,6 +101,13 @@ public class GameScreen implements Screen {
             replaceResource(resource);
             resourceSprites.add(resource);
         }
+    }
+    
+    private void setupLabel() {
+        font = new BitmapFont();
+        font.setUseIntegerPositions(false);
+        font.getData().setScale(WORLD_HEIGHT / Gdx.graphics.getHeight());
+        font.setColor(Color.BLUE);
     }
 
     @Override
@@ -254,6 +265,11 @@ public class GameScreen implements Screen {
             resource.draw(batch);
         }
         playerSprite.draw(batch);
+
+        String resourceLabelText = "Resources: " + resourcesCollected;
+        float labelX = camera.position.x - (camera.viewportWidth / 2);
+        float labelY = camera.position.y - (camera.viewportHeight / 2 - 1);
+        font.draw(batch, resourceLabelText, labelX, labelY);
 
         batch.end();
     }
