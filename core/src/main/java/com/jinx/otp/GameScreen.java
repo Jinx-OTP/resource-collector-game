@@ -200,7 +200,7 @@ public class GameScreen implements Screen {
         float bufferZone;
         switch (direction) {
             case RIGHT:
-                bufferZone = (camera.viewportWidth + PLAYER_WIDTH) / 2;
+                bufferZone = (camera.viewportWidth - PLAYER_WIDTH) / 2;
                 return (playerSprite.getX() > bufferZone);
             case LEFT:
                 bufferZone = WORLD_WIDTH - (camera.viewportWidth + PLAYER_WIDTH) / 2;
@@ -209,7 +209,7 @@ public class GameScreen implements Screen {
                 bufferZone = WORLD_HEIGHT - (camera.viewportHeight + PLAYER_HEIGHT) / 2;
                 return (playerSprite.getY() < bufferZone);
             case UP:
-                bufferZone = (camera.viewportHeight + PLAYER_HEIGHT) / 2;
+                bufferZone = (camera.viewportHeight - PLAYER_HEIGHT) / 2;
                 return (playerSprite.getY() > bufferZone);
             default:
                 return false;
