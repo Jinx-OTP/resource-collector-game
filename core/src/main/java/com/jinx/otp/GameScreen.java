@@ -235,7 +235,6 @@ public class GameScreen implements Screen {
             resource.setPosition(resourceX, resourceY);
             if (player.overlaps(resource)) {
                 ++resourcesCollected;
-                System.out.println("Resources collected: " + resourcesCollected);
                 replaceResource(resourceSprite);
             }
         }
