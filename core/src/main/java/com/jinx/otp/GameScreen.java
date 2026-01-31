@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
@@ -22,6 +23,7 @@ public class GameScreen implements Screen {
 
     private final float RESOURCE_WIDTH = 1f;
     private final float RESOURCE_HEIGHT = 1f;
+    private final int DISPLAYED_RESOURCES_LIMIT = 10;
 
     private final String PLAYER_IMAGE_FILE_NAME = "player.png";
     private final String RESOURCE_IMAGE_FILE_NAME = "resource.png";
@@ -43,12 +45,15 @@ public class GameScreen implements Screen {
 
     private ResourceCollectorGame game;
 
+    private int resourcesCollected;
+
     public GameScreen(ResourceCollectorGame game) {
         this.game = game;
         batch = game.getBatch();
         setupBackground();
         setupPlayer();
         setupCamera(); // need to perform after player setup!!
+        setupResources();
     }
     
     private void setupBackground() {
@@ -80,6 +85,18 @@ public class GameScreen implements Screen {
         camera.position.set(posX, posY, posZ);
         camera.zoom = DEFAULT_CAMERA_ZOOM;
         camera.update();
+    }
+
+    private void setupResources() {
+        resourcesCollected = 0;
+        resourceSprites = new Array<>();
+        resourceTexture = new Texture(Gdx.files.internal(RESOURCE_IMAGE_FILE_NAME));
+        for (int i = 0; i < DISPLAYED_RESOURCES_LIMIT; ++i) {
+            Sprite resource = new Sprite(resourceTexture);
+            resource.setSize(RESOURCE_WIDTH, RESOURCE_HEIGHT);
+            replaceResource(resource);
+            resourceSprites.add(resource);
+        }
     }
 
     @Override
@@ -166,7 +183,6 @@ public class GameScreen implements Screen {
         float playerMinY = 0f;
         float playerMaxY = WORLD_HEIGHT - PLAYER_HEIGHT;
         playerSprite.setY(MathUtils.clamp(playerSprite.getY(), playerMinY, playerMaxY));
-
     }
 
     private boolean isPlayerNotInCameraLock(Direction direction) {
@@ -190,7 +206,40 @@ public class GameScreen implements Screen {
     }
 
     private void logic() {
+        checkResourceCollection();
+    }
 
+    private void checkResourceCollection() {
+        float playerX = playerSprite.getX();
+        float playerY = playerSprite.getY();
+        Rectangle player = new Rectangle(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
+
+        float initialX = 0f;
+        float initialY = 0f;
+        Rectangle resource = new Rectangle(initialX, initialY, RESOURCE_WIDTH, RESOURCE_HEIGHT);
+
+        for (Sprite resourceSprite : resourceSprites) {
+            float resourceX = resourceSprite.getX();
+            float resourceY = resourceSprite.getY();
+            resource.setPosition(resourceX, resourceY);
+            if (player.overlaps(resource)) {
+                ++resourcesCollected;
+                System.out.println("Resources collected: " + resourcesCollected);
+                replaceResource(resourceSprite);
+            }
+        }
+    }
+
+    private void replaceResource(Sprite resource) {
+        float minX = 0f;
+        float maxX = WORLD_WIDTH - RESOURCE_WIDTH;
+        float newX = MathUtils.random(minX, maxX);
+
+        float minY = 0f;
+        float maxY = WORLD_HEIGHT - RESOURCE_HEIGHT;
+        float newY = MathUtils.random(minY, maxY);
+
+        resource.setPosition(newX, newY);
     }
 
     private void draw() {
@@ -199,8 +248,11 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
-
+        
         backgroundSprite.draw(batch);
+        for (Sprite resource : resourceSprites) {
+            resource.draw(batch);
+        }
         playerSprite.draw(batch);
 
         batch.end();
